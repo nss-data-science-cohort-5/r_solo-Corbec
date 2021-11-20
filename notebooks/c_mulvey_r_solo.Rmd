@@ -84,7 +84,7 @@ districts %>%
 districts %>% 
   group_by(region) %>%
   mutate(region_enrollment = sum(enrollment, na.rm = TRUE)) %>% 
-  ggplot(aes(x = region, y = region_enrollment)) +
+  ggplot(aes(x = region,  y = region_enrollment)) +
   geom_col()
 ```
 Mid Cumberland has the highest enrollment and Northwest has the smallest.
@@ -110,6 +110,7 @@ districts %>%
 
 ```{r}
 districts %>% 
+  drop_na(c(grad, enrollment)) %>% 
   summarize(weighted.mean(grad, enrollment, na.rm = TRUE))
 ```
 
@@ -131,17 +132,110 @@ districts %>%
   geom_boxplot()
 ```
 
+16. Find the weighted average of graduation rates by region using enrollment as weights. Compare the results you get for the weighted average to what you see from the boxplots. Can you explain any discrepancy?
+
+```{r}
+districts %>% 
+  group_by(region) %>% 
+  summarize(weighted.mean(grad, enrollment, na.rm = TRUE))
+```
+There are three regions that don't have a weighted mean.
+
+17. For many districts, values for alg_2 are lower than for alg_1. Create a histogram showing the distribution of differences (alg_1 - alg_2). Which school had the largest drop from alg_1 to alg_2? For what percentage of schools is it true that alg_2 is larger than alg_1? Is there a similar dropoff for eng_2 and eng_3?
+
+```{r}
+districts %>% 
+  mutate(alg_diff = alg_1 - alg_2) %>% 
+  ggplot(aes(x = alg_diff)) +
+  geom_histogram()
+```
+```{r}
+districts %>% 
+  mutate(alg_diff = alg_1 - alg_2) %>% 
+  filter(alg_diff < 0) %>% 
+  filter(alg_diff == min(alg_diff))
+```
+```{r}
+greater <- districts %>% 
+  mutate(alg_diff = alg_1 - alg_2) %>% 
+  filter(alg_diff > 0) %>% 
+  count()
 
 
+ greater / count(districts) * 100
+```
+
+```{r}
+districts %>% 
+  mutate(eng_diff = eng_2 - eng_3) %>% 
+  ggplot(aes(x = eng_diff)) +
+  geom_histogram()
+```
+
+```{r}
+districts %>% 
+  mutate(eng_diff = eng_2 - eng_3) %>% 
+  filter(eng_diff < 0) %>% 
+  filter(eng_diff == min(eng_diff))
+```
+
+```{r}
+districts %>% 
+  mutate(eng_diff = eng_2 - eng_3) %>% 
+  filter(eng_diff < 0) %>% 
+  count()
+```
+
+```{r}
+greater <- districts %>% 
+  mutate(eng_diff = eng_2 - eng_3) %>% 
+  filter(eng_diff > 0) %>% 
+  count()
 
 
+ greater / count(districts) * 100
+```
 
 
+18. You may have noticed that a lot of rows are missing values. Which district has the largest number of missing values? What do you notice about schools that have a lot of missing values?
+
+```{r}
+districts %>% 
+  filter_all(any_vars( is.na(.)))
+```
 
 
+19. Find the correlation between graduation rate and all other variables. Create a horizontal bar chart showing these correlations. Make sure that your plot is ordered by correlation values. What do you notice from these correlations?
 
+```{r}
+districts %>% 
+  select(where(is.numeric))
+  cor(x = grads)
+```
 
+20. Create a scatterplot for grad vs. suspended. Does what you see make sense given your answer from the previous part?
 
+```{r}
+districts %>% 
+  ggplot(aes(x = grad, y= suspended)) +
+  geom_point()
+```
+
+21. Create a linear regression model using lm with target variable grad and predictor variable suspended. What R^2 value does this model have? What is the interpretation of this number?
+
+```{r}
+grad_suspended_model <- lm(grad ~ suspended, data = districts)
+
+summary(grad_suspended_model)
+```
+
+Add the regression line to your scatterplot using geom_smooth with method='lm'. How do you feel about the regression line after seeing it plotted on the scatterplot?
+
+```{r}
+districts %>% 
+  ggplot(aes(x = grad, y= suspended)) +
+  geom_smooth(method = 'lm')
+```
 
 
 
