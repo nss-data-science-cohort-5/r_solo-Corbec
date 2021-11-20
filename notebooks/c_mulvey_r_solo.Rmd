@@ -209,8 +209,9 @@ districts %>%
 
 ```{r}
 districts %>% 
-  select(where(is.numeric))
-  cor(x = grads)
+  select(where(is.numeric)) %>% 
+  cor(use = 'pairwise.complete.obs') %>% 
+  .[24,]
 ```
 
 20. Create a scatterplot for grad vs. suspended. Does what you see make sense given your answer from the previous part?
