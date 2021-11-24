@@ -5,6 +5,7 @@ output: html_notebook
 
 ```{r}
 library(tidyverse)
+library(readxl)
 ```
 
 
@@ -29,7 +30,7 @@ districts %>%
   count()
 ```
 
-4. How many districts have a proviciency rate less than 50% for either alg_1 or eng_1?
+4. How many districts have a proficiency rate less than 50% for either alg_1 or eng_1?
 
 ```{r}
 districts %>% 
@@ -229,8 +230,11 @@ grad_suspended_model <- lm(grad ~ suspended, data = districts)
 
 summary(grad_suspended_model)
 ```
+The R^2 for this model is approximately 7%. This means that suspensions account for about 7% of the variation in graduation rate.
 
-Add the regression line to your scatterplot using geom_smooth with method='lm'. How do you feel about the regression line after seeing it plotted on the scatterplot?
+
+
+22. Add the regression line to your scatterplot using geom_smooth with method='lm'. How do you feel about the regression line after seeing it plotted on the scatterplot?
 
 ```{r}
 districts %>% 
@@ -238,7 +242,51 @@ districts %>%
   geom_smooth(method = 'lm')
 ```
 
+Continued Exploration and Practice
 
+23. Read in the school-level testing data for 2014, available here. You might find the readxl library useful for this task. If you use this library, be sure to look at the na argument for the read_excel function.
+
+```{r}
+testing <- read_excel('../data/data_2014_school_base.xlsx',
+                      na = c('*', '**'))
+```
+
+24. How many schools have at least 20 percent of students below bsc for Algebra I? Which districts do these schools belong to?
+
+```{r}
+testing %>% 
+  group_by(subject) %>% 
+  filter(subgroup == 'All Students' &
+           grade == 'All Grades' &
+           subject == 'Algebra I' &
+           pct_below_bsc >= 20) %>%
+  count()
+```
+
+```{r}
+testing %>% 
+  group_by(subject) %>% 
+  filter(subgroup == 'All Students' &
+           grade == 'All Grades' &
+           subject == 'Algebra I' &
+           pct_below_bsc >= 20) %>%
+  select(system_name) %>% 
+  unique()
+```
+
+24. How many schools have at least 20 percent of students below bsc for both Algebra I and English I?
+
+```{r}
+testing %>% 
+  filter(subgroup == 'All Students' &
+           grade == 'All Grades') %>%
+  filter(subject == 'Algebra I' &
+           pct_below_bsc >= 20 |
+           subject == 'English I' &
+           pct_below_bsc >= 20) %>% 
+  count()
+
+```
 
 
 
